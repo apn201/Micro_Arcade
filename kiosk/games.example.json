@@ -1,0 +1,1631 @@
+{
+  "title": "MICRO ARCADE",
+  "_comment": [
+    "The kiosk library. Copy to games.json and edit; games.json is gitignored,",
+    "so a personal library stays out of the repository. Bundles are never",
+    "committed either.",
+    "",
+    "CONTROL BUDGET: a tilt sensor and one button, and the button is the",
+    "screen itself -- pressing it hides the picture. Tilt carries anything",
+    "continuous; the button is for taps. Long press is reserved by the kiosk",
+    "for 'back to the menu' and cannot be bound. Nothing needing a held",
+    "button, a mouse, or typing.",
+    "",
+    "SELECT AND PLAY: the cabinet cannot read a DOS menu -- the text is",
+    "unreadable at 128x128 and there is no pointer -- so boot_keys has to",
+    "carry a title all the way from the launcher into gameplay: sound-card",
+    "prompt, title screens, pilot name, difficulty, briefing, the lot. Every",
+    "entry below was auditioned by scripting those keys, then holding a",
+    "movement key and checking that the picture answered it. A title that",
+    "could not be driven into gameplay is not in this file.",
+    "",
+    "BUNDLES: `exodos` names the entry in an eXoDOS collection. Build one with",
+    "  python server/jsdos/from-exodos.py \"Heretic (1994)\"",
+    "which writes the .jsdos named in `bundle` next to the js-dos backend, or",
+    "build every title in this file at once with",
+    "  python server/jsdos/build-library.py",
+    "",
+    "BOOT KEYS: each step waits that many milliseconds after the previous one,",
+    "then taps a key. To work out a sequence for a new title, run",
+    "  python server/jsdos/audition.py \"Some Game (1993)\"",
+    "which writes a filmstrip of what it saw next to the backend: read the",
+    "menu it stalled on, add the keys that answer it, and run it again.",
+    "",
+    "Key names: service/microstream/keys.py. Roles: left right up down fire",
+    "double use run start menu."
+  ],
+  "games": [
+    {
+      "id": "skyrim",
+      "title": "Skyrim",
+      "engine": "video",
+      "file": "media/skyrim_lores.mp4",
+      "start_s": 0,
+      "loop": true,
+      "verified": "a recording, not the game: plays in real time and loops",
+      "note": "Not emulated and not interactive. A video, streamed through the same rectangle pipeline as every game, because a dumb terminal cannot tell the difference. Supply your own file in kiosk/media/; it is gitignored and never goes in the repository."
+    },
+    {
+      "id": "stunts",
+      "title": "Stunts",
+      "engine": "jsdos",
+      "exodos": "Stunts (1990)",
+      "bundle": "stunts-1990.jsdos",
+      "verified": "in-game: car on the track, answers the throttle",
+      "note": "Polygonal 3D driving with a track editor, in 1990. Lean to steer, lean forward to accelerate -- tilt fits this better than a keyboard ever did.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "space",
+        "double": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 200
+      }
+    },
+    {
+      "id": "testdrive3",
+      "title": "Test Drive III",
+      "engine": "jsdos",
+      "exodos": "Test Drive III The Passion (1990)",
+      "bundle": "test-drive-iii-the-passion-1990.jsdos",
+      "verified": "in-game: driving, scenery scrolling past",
+      "note": "Full 3D open roads and a dashboard drawn in loving detail. That dashboard alone is more pixels than the ESP32 has memory for.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "space",
+        "double": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 200
+      }
+    },
+    {
+      "id": "stuntdriver",
+      "title": "Stunt Driver",
+      "engine": "jsdos",
+      "exodos": "Stunt Driver (1990)",
+      "bundle": "stunt-driver-1990.jsdos",
+      "verified": "in-game: on the course under throttle",
+      "note": "Spectrum HoloByte's stunt course: loops, jumps and a chase camera. Steering and throttle are the whole game.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "space",
+        "double": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 200
+      }
+    },
+    {
+      "id": "indy500",
+      "title": "Indianapolis 500",
+      "engine": "jsdos",
+      "exodos": "Indianapolis 500 The Simulation (1989)",
+      "bundle": "indianapolis-500-the-simulation-1989.jsdos",
+      "verified": "in-game: out of the pits, cockpit view",
+      "note": "Papyrus's simulation, the start of the lineage that ends at iRacing. It opens in an attract loop that says PRESS ESCAPE TO DRIVE, and the menu behind it already sits on PRACTICE -- so the cabinet never reads a menu.",
+      "boot_keys": [
+        {
+          "wait": 3500,
+          "key": "1"
+        },
+        {
+          "wait": 3500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "esc"
+        },
+        {
+          "wait": 3000,
+          "key": "enter"
+        },
+        {
+          "wait": 3000,
+          "key": "enter"
+        },
+        {
+          "wait": 3000,
+          "key": "enter"
+        },
+        {
+          "wait": 3000,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "space",
+        "double": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 200
+      }
+    },
+    {
+      "id": "skyroads",
+      "title": "SkyRoads",
+      "engine": "jsdos",
+      "exodos": "SkyRoads (1993)",
+      "bundle": "skyroads-1993.jsdos",
+      "verified": "in-game: on the track and accelerating",
+      "note": "Drive and jump along a ribbon of road in space. Steer with tilt, jump with a tap, nothing held -- the closest thing to a native fit for this cabinet, and the most legible title in the library at 128x128.",
+      "boot_keys": [
+        {
+          "wait": 4000,
+          "key": "enter"
+        },
+        {
+          "wait": 3000,
+          "key": "enter"
+        },
+        {
+          "wait": 3000,
+          "key": "enter"
+        },
+        {
+          "wait": 3000,
+          "key": "enter"
+        },
+        {
+          "wait": 3000,
+          "key": "space"
+        },
+        {
+          "wait": 3000,
+          "key": "enter"
+        },
+        {
+          "wait": 3000,
+          "key": "space"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "space",
+        "double": "enter",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 200
+      }
+    },
+    {
+      "id": "f15",
+      "title": "F-15 Strike Eagle II",
+      "engine": "jsdos",
+      "exodos": "F-15 Strike Eagle II (Deluxe Edition) (1992)",
+      "bundle": "f-15-strike-eagle-ii-deluxe-edition-1992.jsdos",
+      "verified": "in-game: airborne, HUD live, answers pitch",
+      "note": "MicroProse's flight sim, with a full instrument panel and a 3D world underneath it. Tilt is the stick, which is what a stick wants to be.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "space",
+        "double": "enter",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 190
+      }
+    },
+    {
+      "id": "wolf3d",
+      "title": "Wolfenstein 3D",
+      "engine": "jsdos",
+      "exodos": "Wolfenstein 3D (1992)",
+      "bundle": "wolfenstein-3d-1992.jsdos",
+      "verified": "in-game: walking a corridor, doors opening",
+      "note": "The one that invented the genre. Tilt turns, a tap fires, a double tap opens doors.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "leftctrl",
+        "double": "space",
+        "run": "leftshift",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 180
+      }
+    },
+    {
+      "id": "blakestone",
+      "title": "Blake Stone",
+      "engine": "jsdos",
+      "exodos": "Blake Stone - Aliens of Gold (1993)",
+      "bundle": "blake-stone-aliens-of-gold-1993.jsdos",
+      "verified": "in-game: corridor, enemy met, taking damage",
+      "note": "The Wolfenstein engine with a science-fiction skin, informants to talk to and a floor map. Walks and shoots on the same three controls.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "leftctrl",
+        "double": "space",
+        "run": "leftshift",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 180
+      }
+    },
+    {
+      "id": "catacomb3d",
+      "title": "Catacomb 3-D",
+      "engine": "jsdos",
+      "exodos": "Catacomb 3-D (1992)",
+      "bundle": "catacomb-3-d-1992.jsdos",
+      "verified": "in-game: dungeon corridor, status bar live",
+      "note": "Carmack's first texture-mapped first-person engine, months before Wolfenstein. Throwing fireballs down a dungeon corridor in 1992.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "leftctrl",
+        "double": "space",
+        "run": "leftshift",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 180
+      }
+    },
+    {
+      "id": "heretic",
+      "title": "Heretic",
+      "engine": "jsdos",
+      "exodos": "Heretic (1994)",
+      "bundle": "heretic-1994.jsdos",
+      "verified": "in-game: walking a castle, full HUD",
+      "note": "The DOOM engine with look-up, flight and an inventory. Bigger and prettier than anything that fits in ESP32 flash, on a 0.85in screen.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "leftctrl",
+        "double": "space",
+        "run": "leftshift",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 180
+      }
+    },
+    {
+      "id": "rott",
+      "title": "Rise of the Triad",
+      "engine": "jsdos",
+      "exodos": "Rise of the Triad - The Hunt Begins (Deluxe Edition) (1995)",
+      "bundle": "rise-of-the-triad-the-hunt-begins-deluxe-edition-1995.jsdos",
+      "verified": "in-game: outdoors, weapon drawn, moving",
+      "note": "Wolfenstein's engine pushed past breaking point: jump pads, tilting floors and absurd weapons.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "leftctrl",
+        "double": "space",
+        "run": "leftshift",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 180
+      }
+    },
+    {
+      "id": "stryker",
+      "title": "Major Stryker",
+      "engine": "jsdos",
+      "exodos": "Major Stryker (1993)",
+      "bundle": "major-stryker-1993.jsdos",
+      "verified": "in-game: flying the level, firing",
+      "note": "Apogee's horizontal shooter: parallax starfields and a screen full of sprites. Tilt flies, the button shoots.",
+      "boot_keys": [
+        {
+          "wait": 3500,
+          "key": "1"
+        },
+        {
+          "wait": 3500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 3500,
+          "key": "space"
+        },
+        {
+          "wait": 3000,
+          "key": "space"
+        },
+        {
+          "wait": 3000,
+          "key": "enter"
+        },
+        {
+          "wait": 3000,
+          "key": "space"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "leftctrl",
+        "double": "space",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 190
+      }
+    },
+    {
+      "id": "tyrian",
+      "title": "Tyrian",
+      "engine": "jsdos",
+      "exodos": "Tyrian (1995)",
+      "bundle": "tyrian-1995.jsdos",
+      "verified": "in-game: level scrolling, ship under control",
+      "note": "One of the best-looking shooters on DOS. Its Game Menu opens on the Data reader, so the sequence backs out of that and walks down to Play Next Level -- exactly the select-and-play the cabinet needs.",
+      "boot_keys": [
+        {
+          "wait": 3500,
+          "key": "1"
+        },
+        {
+          "wait": 3500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "esc"
+        },
+        {
+          "wait": 3000,
+          "key": "down"
+        },
+        {
+          "wait": 2000,
+          "key": "down"
+        },
+        {
+          "wait": 2000,
+          "key": "down"
+        },
+        {
+          "wait": 2000,
+          "key": "down"
+        },
+        {
+          "wait": 3000,
+          "key": "enter"
+        },
+        {
+          "wait": 3000,
+          "key": "enter"
+        },
+        {
+          "wait": 3000,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "leftctrl",
+        "double": "space",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 190
+      }
+    },
+    {
+      "id": "duke1",
+      "title": "Duke Nukem",
+      "engine": "jsdos",
+      "exodos": "Duke Nukem - Episode 1 - Shrapnel City (1991)",
+      "bundle": "duke-nukem-episode-1-shrapnel-city-1991.jsdos",
+      "verified": "in-game: running and jumping through the level",
+      "note": "Before the third dimension: EGA, sixteen colours, and a jump that lands where you meant it to. Tap jumps, double tap shoots.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "leftctrl",
+        "double": "leftalt",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 190
+      }
+    },
+    {
+      "id": "keen4",
+      "title": "Commander Keen 4",
+      "engine": "jsdos",
+      "exodos": "Commander Keen 4 - Secret of the Oracle (1991)",
+      "bundle": "commander-keen-4-secret-of-the-oracle-1991.jsdos",
+      "verified": "in-game: walking the world map",
+      "note": "Smooth-scrolling EGA platforming that PCs were not supposed to manage, plus a world map to wander. Tap jumps, double tap pogos.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "leftctrl",
+        "double": "leftalt",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 190
+      }
+    },
+    {
+      "id": "cosmo",
+      "title": "Cosmo's Cosmic Adventure",
+      "engine": "jsdos",
+      "exodos": "Cosmo's Cosmic Adventure - Forbidden Planet (1992)",
+      "bundle": "cosmo-s-cosmic-adventure-forbidden-planet-1992.jsdos",
+      "verified": "in-game: walking the level, scenery scrolling",
+      "note": "Cosmo sticks to walls with his suction-cup hands. One button is the whole game, which is precisely this cabinet's budget.",
+      "boot_keys": [
+        {
+          "wait": 3500,
+          "key": "1"
+        },
+        {
+          "wait": 3500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "leftctrl",
+        "double": "space",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 190
+      }
+    },
+    {
+      "id": "jill",
+      "title": "Jill of the Jungle",
+      "engine": "jsdos",
+      "exodos": "Jill of the Jungle (1992)",
+      "bundle": "jill-of-the-jungle-1992.jsdos",
+      "verified": "in-game: Jill walking the level",
+      "note": "Epic's first platformer, and the one that put them on the map. Runs, jumps and throws knives on three controls.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "leftctrl",
+        "double": "leftalt",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 190
+      }
+    },
+    {
+      "id": "crystalcaves",
+      "title": "Crystal Caves",
+      "engine": "jsdos",
+      "exodos": "Crystal Caves (1991)",
+      "bundle": "crystal-caves-1991.jsdos",
+      "verified": "in-game: in the cave, moving",
+      "note": "Mine crystals, avoid everything else. Compact, readable and fast, which matters a lot at 128x128.",
+      "boot_keys": [
+        {
+          "wait": 3500,
+          "key": "1"
+        },
+        {
+          "wait": 3500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "leftctrl",
+        "double": "leftalt",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 190
+      }
+    },
+    {
+      "id": "biomenace",
+      "title": "Bio Menace",
+      "engine": "jsdos",
+      "exodos": "Bio Menace (1993)",
+      "bundle": "bio-menace-1993.jsdos",
+      "verified": "in-game: running the level",
+      "note": "Apogee's answer to the console run-and-guns, on the Keen engine with a gun bolted on.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "leftctrl",
+        "double": "leftalt",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 190
+      }
+    },
+    {
+      "id": "hocus",
+      "title": "Hocus Pocus",
+      "engine": "jsdos",
+      "exodos": "Hocus Pocus (1994)",
+      "bundle": "hocus-pocus-1994.jsdos",
+      "verified": "in-game: moving through the level",
+      "note": "A wizard, a lot of VGA colour, and levels built out of floating brick. One of the better-looking shareware platformers.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "leftctrl",
+        "double": "space",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 190
+      }
+    },
+    {
+      "id": "prehistorik2",
+      "title": "Prehistorik 2",
+      "engine": "jsdos",
+      "exodos": "Prehistorik 2 (1993)",
+      "bundle": "prehistorik-2-1993.jsdos",
+      "verified": "in-game: walking the level, club in hand",
+      "note": "Titus at their most charming: a caveman with a club, hand-drawn and hugely colourful.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "space",
+        "double": "leftctrl",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 190
+      }
+    },
+    {
+      "id": "pop",
+      "title": "Prince of Persia",
+      "engine": "jsdos",
+      "exodos": "Prince of Persia (1990)",
+      "bundle": "prince-of-persia-1990.jsdos",
+      "verified": "in-game: in the dungeon, under control",
+      "note": "Rotoscoped animation in 1990: every step, jump and stumble traced from film. Still the most convincing movement of its decade.",
+      "boot_keys": [
+        {
+          "wait": 2500,
+          "key": "1"
+        },
+        {
+          "wait": 2500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        },
+        {
+          "wait": 1500,
+          "key": "enter"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "leftshift",
+        "double": "space",
+        "start": "enter",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 190
+      }
+    },
+    {
+      "id": "doom",
+      "title": "DOOM",
+      "engine": "doom",
+      "license": "shareware",
+      "note": "Native doomgeneric, and the only profile that knows its game's state: the button means ENTER in menus, USE when dead, FIRE in play.",
+      "args": {
+        "warp": "1 1",
+        "skill": 3
+      }
+    },
+    {
+      "id": "digger",
+      "title": "Digger",
+      "engine": "jsdos",
+      "license": "freeware",
+      "bundle": "digger.jsdos",
+      "fetch": "https://v8.js-dos.com/bundles/digger.jsdos",
+      "note": "Windmill Software released it as freeware in 1998, and js-dos hosts it. Four directions and one button is the entire game, so it is the safest thing here and the one that proves the pipeline.",
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "f1",
+        "start": "f1",
+        "double": "space",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 200
+      }
+    }
+  ]
+}

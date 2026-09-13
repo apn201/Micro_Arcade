@@ -1,0 +1,16 @@
+# The whole service. Both do their heavy work in C, which is why the per-frame
+# Python cost is negligible.
+#
+# On Debian/Raspberry Pi OS prefer the distro packages -- pip would rebuild both
+# from source, and bookworm blocks system-wide pip installs (PEP 668):
+#
+#     sudo apt install python3-numpy python3-pil
+#
+# deploy/install.sh does that for you and only falls back to this file.
+Pillow>=9.0
+numpy>=1.21
+
+# Optional: video titles in the kiosk (engine "video"). OpenCV bundles its own
+# FFmpeg, so nothing else needs installing. Without it those entries are left
+# out of the menu and everything else works.
+# opencv-python-headless>=4.5

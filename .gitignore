@@ -1,0 +1,51 @@
+# WADs stay out of the repo. Shareware doom1.wad is freely redistributable but
+# there is no reason to carry 4MB of it here, and retail WADs must never land
+# in a public competition entry.
+*.wad
+*.WAD
+
+# build products
+server/work/
+server/micro-doom
+server/build/
+*.o
+
+# device credentials
+client/config.py
+
+# python
+__pycache__/
+*.pyc
+.venv/
+
+# scratch
+*.jpg
+*.png
+!docs/**/*.png
+
+# build products (new layout)
+server/doom-source
+server/doom-source.exe
+server/doom-source.pdb
+server/*.cfg
+
+# js-dos: the emulator package and game bundles are built or fetched locally,
+# never committed. DOS titles come from your own eXoDOS copy; the same posture
+# as the WAD applies.
+server/jsdos/node_modules/
+*.jsdos
+server/jsdos/probe.log
+# raw frames the probe and the audition dump
+*.rgb
+*.rgb.*
+
+# A personal game library, and anything it points at
+kiosk/games.json
+
+# Video titles are recordings of commercial games. The library points at a
+# file you supply; the file itself never goes in the repository.
+kiosk/media/
+*.mp4
+*.mkv
+*.webm
+*.avi

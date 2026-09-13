@@ -1,0 +1,45 @@
+# Template. deploy/install.sh substitutes __DIR__, __USER__ and __PYTHON__ and
+# writes the result to /etc/systemd/system/micro-doom.service -- edit that copy,
+# or better, edit /etc/micro-doom.env and restart.
+
+[Unit]
+Description=micro-doom streaming service
+Documentation=https://github.com/apn201/micro-doom
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__USER__
+Group=__USER__
+WorkingDirectory=__DIR__
+
+# All configuration lives here as MD_* variables; the leading - means the
+# service still starts if the file is missing.
+EnvironmentFile=-/etc/micro-doom.env
+ExecStart=__PYTHON__ __DIR__/service/run.py
+
+# A demo has to survive a power cut and a flaky WiFi router without anyone
+# logging in.
+Restart=always
+RestartSec=2
+
+# The service spawns headless DOOM, which writes default.cfg and savegames next
+# to its own binary -- hence the writable path. Nothing else needs writing.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=__DIR__
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictSUIDSGID=true
+LockPersonality=true
+
+# Generous for a 128x128 stream, tight enough to notice a leak. Remove it on a
+# 512MB Pi Zero if the service ever gets OOM-killed.
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target

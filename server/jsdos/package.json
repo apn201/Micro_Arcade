@@ -1,0 +1,10 @@
+{
+  "name": "micro-arcade-jsdos",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Headless js-dos backend for the Micro Arcade streaming service",
+  "license": "GPL-2.0",
+  "dependencies": {
+    "emulators": "^8.4.2"
+  }
+}

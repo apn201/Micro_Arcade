@@ -1,0 +1,11 @@
+# Keep line endings stable across Windows and Linux checkouts. A shell script
+# with CRLF endings fails on the Pi with "bad interpreter", and the systemd
+# unit and env file are read by Linux tools too.
+* text=auto
+*.sh text eol=lf
+*.service text eol=lf
+*.env.example text eol=lf
+*.py text eol=lf
+*.js text eol=lf
+*.c text eol=lf
+*.h text eol=lf
