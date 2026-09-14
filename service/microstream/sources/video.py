@@ -13,7 +13,9 @@ of the menu.
     pip install opencv-python-headless
 """
 
+import collections
 import os
+import threading
 import time
 
 from .. import protocol as P
@@ -33,9 +35,16 @@ class VideoSource(Source):
     name = "video"
     pixel_aspect = 1.0
 
-    #: Beyond this far behind real time, seek instead of decoding every frame
-    #: in between -- after a stall, skipping ahead is what "live" means.
-    MAX_CATCHUP_S = 2.0
+    #: How far ahead of the clock the decoder keeps frames ready. Decoding is
+    #: usually 0.3 ms a frame, but measured it occasionally stalls for ~180 ms;
+    #: done inline that froze the whole service loop and showed on the device
+    #: as the picture stopping. Half a second of buffer swallows those.
+    BUFFER_S = 0.5
+
+    #: The service sends ~20 fps; decoding a 60 fps file frame by frame only
+    #: to throw two thirds away is wasted work. Frames between are grabbed
+    #: (demuxed, not converted to pixels).
+    MAX_OUT_FPS = 30
 
     def __init__(self, path, loop=True, start_s=0.0, crop_aspect=1.0):
         if cv2 is None:
@@ -49,9 +58,12 @@ class VideoSource(Source):
         self.crop_aspect = crop_aspect
         self.cap = None
         self.default_crop = None
-        self._t0 = 0.0
-        self._index = 0
-        self._ended = False
+
+        self._queue = collections.deque()
+        self._lock = threading.Lock()
+        self._stop = threading.Event()
+        self._thread = None
+        self._finished = False
 
         # Open now rather than in start(): the kiosk reads this source's shape
         # to rebuild the scaler, and it should be right from the first frame.
@@ -73,52 +85,80 @@ class VideoSource(Source):
             self.default_crop = ((self.width - cw) // 2, 0, cw, self.height)
 
     def start(self):
-        self._seek(self.start_s)
+        self.cap.set(cv2.CAP_PROP_POS_FRAMES, int(self.start_s * self.fps))
+        self._thread = threading.Thread(target=self._decode, name="video-decode",
+                                        daemon=True)
+        self._thread.start()
 
-    def _seek(self, seconds):
-        self.cap.set(cv2.CAP_PROP_POS_FRAMES, int(seconds * self.fps))
-        self._index = int(seconds * self.fps)
-        self._t0 = time.monotonic() - seconds
+    # --- decoder thread ---------------------------------------------------
+
+    def _decode(self):
+        step = max(1, int(round(self.fps / self.MAX_OUT_FPS)))
+        interval = step / self.fps
+        due = time.monotonic()               # wall-clock time of the next frame
+
+        while not self._stop.is_set():
+            now = time.monotonic()
+            with self._lock:
+                ahead = (self._queue[-1][0] - now) if self._queue else -1.0
+            if ahead > self.BUFFER_S:
+                time.sleep(0.01)
+                continue
+
+            # Fallen behind (a long stall, a busy machine): skip forward without
+            # decoding pixels rather than playing the backlog in slow motion.
+            skip = step - 1
+            if due < now - 0.25:
+                late = int((now - due) / interval)
+                skip += late * step
+                due += late * interval
+
+            ok = True
+            for _ in range(skip):
+                if not self.cap.grab():
+                    ok = False
+                    break
+            if ok:
+                ok, frame = self.cap.read()
+            if not ok:
+                if not self.loop:
+                    break
+                self.cap.set(cv2.CAP_PROP_POS_FRAMES, int(self.start_s * self.fps))
+                continue
+
+            rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            with self._lock:
+                self._queue.append((due, rgb))
+            due += interval
+
+        self._finished = True
+
+    # --- service side -----------------------------------------------------
 
     def poll(self):
-        if self._ended:
+        now = time.monotonic()
+        newest = None
+        with self._lock:
+            while self._queue and self._queue[0][0] <= now:
+                newest = self._queue.popleft()[1]
+        if newest is None:
             return None
-
-        due = int((time.monotonic() - self._t0) * self.fps)
-        if due <= self._index:
-            return None                  # not time for the next frame yet
-
-        if due - self._index > self.MAX_CATCHUP_S * self.fps:
-            self.cap.set(cv2.CAP_PROP_POS_FRAMES, due - 1)
-            self._index = due - 1
-
-        # Frames we are late for are grabbed but never decoded to pixels; only
-        # the newest one pays for colour conversion.
-        while self._index < due - 1:
-            if not self.cap.grab():
-                return self._end()
-            self._index += 1
-
-        ok, frame = self.cap.read()
-        if not ok:
-            return self._end()
-        self._index += 1
-        return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), P.STATE_LEVEL
-
-    def _end(self):
-        if self.loop:
-            self._seek(self.start_s)
-        else:
-            self._ended = True
-        return None
+        return newest, P.STATE_LEVEL
 
     def send_key(self, pressed, key):
         pass                             # a recording has no controls
 
     def alive(self):
-        return not self._ended
+        if not self._finished:
+            return True
+        with self._lock:
+            return bool(self._queue)
 
     def stop(self):
+        self._stop.set()
+        if self._thread is not None:
+            self._thread.join(timeout=2.0)
+            self._thread = None
         if self.cap is not None:
             self.cap.release()
             self.cap = None

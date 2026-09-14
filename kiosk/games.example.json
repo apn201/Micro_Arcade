@@ -32,8 +32,58 @@
     "menu it stalled on, add the keys that answer it, and run it again.",
     "",
     "Key names: service/microstream/keys.py. Roles: left right up down fire",
-    "double use run start menu."
+    "double use run start menu.",
+    "",
+    "CATALOGUES: the menu lists entries whose \"catalog\" includes \"play\"; the",
+    "demo reel runs entries that include \"demo\". Leave it out for both. The",
+    "reel boots real games live, controls working; \"demo_keys\" replaces",
+    "boot_keys there and \"demo_s\" overrides how long a title stays up.",
+    "",
+    "SETTINGS: kiosk.double_click and reel.double_click are \"game\" (the game",
+    "gets it) or \"next\" (skip to the next title). reel.advance_s moves the",
+    "reel on by itself, 0 to wait for a double click. reel.idle_s starts the",
+    "reel from an untouched menu, 0 never. run.py --reel starts in the reel.",
+    "",
+    "EXODOS: a DOS title with no bundle runs in place from the collection at",
+    "exodos.root (or EXODOS_ROOT, or run.py --exodos-root): nothing copied.",
+    "prefer \"in_place\" skips bundles even when they exist. max_mb skips zips",
+    "too big to run, since one takes about five times its size in memory.",
+    "",
+    "AUTOPILOT: in the reel, a title nobody is holding plays itself once its",
+    "boot keys are done: reel.autopilot holds, taps and weaves between roles",
+    "(forward and fire by default). A title's \"demo_input\" overrides it, or",
+    "false leaves it alone. Pressing or tilting takes over at once; the",
+    "autopilot resumes after 6 idle seconds."
   ],
+  "kiosk": {
+    "double_click": "game"
+  },
+  "reel": {
+    "advance_s": 45,
+    "double_click": "next",
+    "idle_s": 120,
+    "autopilot": {
+      "hold": [
+        "up"
+      ],
+      "tap": [
+        "fire"
+      ],
+      "tap_ms": 600,
+      "weave": [
+        "left",
+        "left",
+        "right"
+      ],
+      "weave_ms": 2000,
+      "weave_hold_ms": 500
+    }
+  },
+  "exodos": {
+    "root": "",
+    "prefer": "bundle",
+    "max_mb": 700
+  },
   "games": [
     {
       "id": "skyrim",
@@ -43,7 +93,522 @@
       "start_s": 0,
       "loop": true,
       "verified": "a recording, not the game: plays in real time and loops",
-      "note": "Not emulated and not interactive. A video, streamed through the same rectangle pipeline as every game, because a dumb terminal cannot tell the difference. Supply your own file in kiosk/media/; it is gitignored and never goes in the repository."
+      "note": "Not emulated and not interactive. A video, streamed through the same rectangle pipeline as every game, because a dumb terminal cannot tell the difference. Supply your own file in kiosk/media/; it is gitignored and never goes in the repository.",
+      "catalog": [
+        "demo"
+      ],
+      "demo_input": false
+    },
+    {
+      "id": "secondreality",
+      "title": "Second Reality",
+      "engine": "video",
+      "file": "media/second_reality.mp4",
+      "catalog": [
+        "demo"
+      ],
+      "loop": true,
+      "verified": "slot only: appears once the video file is in kiosk/media/",
+      "note": "Future Crew, 1993. Recorded rather than emulated; drop a capture of it at kiosk/media/second_reality.mp4 and it joins the demo reel.",
+      "demo_input": false
+    },
+    {
+      "id": "dlair",
+      "title": "Dragon's Lair",
+      "engine": "jsdos",
+      "exodos": "Dragon's Lair (1989)",
+      "bundle": "dragon-s-lair-1989.jsdos",
+      "catalog": [
+        "play",
+        "demo"
+      ],
+      "verified": "starts a game (score and lives screen, drawbridge scene); timing windows with tilt not yet tried on the device",
+      "note": "The laserdisc game, in ReadySoft's PC version. Every scene is a quick-time event: lean the way Dirk has to go, tap to swing the sword. Left alone it plays its own attract demo, which is what the reel shows.",
+      "boot_keys": [
+        {
+          "wait": 3500,
+          "key": "1"
+        },
+        {
+          "wait": 10500,
+          "key": "space"
+        },
+        {
+          "wait": 2000,
+          "key": "space"
+        }
+      ],
+      "demo_keys": [
+        {
+          "wait": 3500,
+          "key": "1"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "space",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 200
+      },
+      "demo_input": false
+    },
+    {
+      "id": "singe",
+      "title": "Singe's Castle",
+      "engine": "jsdos",
+      "exodos": "Dragon's Lair - Escape from Singe's Castle (1991)",
+      "bundle": "dragon-s-lair-escape-from-singe-s-castle-1991.jsdos",
+      "catalog": [
+        "play",
+        "demo"
+      ],
+      "verified": "starts a game (Dirk in the castle); timing with tilt not yet tried",
+      "note": "Dragon's Lair's sequel scenes. ReadySoft's setup screen wants letters: V for VGA, N for no sound, N for no joystick, N for no install.",
+      "boot_keys": [
+        {
+          "wait": 4000,
+          "key": "v"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        },
+        {
+          "wait": 7000,
+          "key": "space"
+        },
+        {
+          "wait": 2000,
+          "key": "space"
+        }
+      ],
+      "keys": {
+        "left": "left",
+        "right": "right",
+        "up": "up",
+        "down": "down",
+        "fire": "space",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 200
+      },
+      "demo_input": {
+        "hold": [],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 1500,
+        "weave": [
+          "up",
+          "left",
+          "right"
+        ],
+        "weave_ms": 1700,
+        "weave_hold_ms": 200
+      }
+    },
+    {
+      "id": "dlair2",
+      "title": "Dragon's Lair II",
+      "engine": "jsdos",
+      "exodos": "Dragon's Lair II - Time Warp (1990)",
+      "bundle": "dragon-s-lair-ii-time-warp-1990.jsdos",
+      "catalog": [
+        "play",
+        "demo"
+      ],
+      "verified": "starts a game (score and lives screen, tavern scene); timing with tilt not yet tried",
+      "note": "Time Warp reads the numeric keypad: numpad 0 starts and swings, 8/2/4/6 move. The tilt maps to those, so the cabinet does not care.",
+      "boot_keys": [
+        {
+          "wait": 4000,
+          "key": "v"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        },
+        {
+          "wait": 7000,
+          "key": "kp0"
+        },
+        {
+          "wait": 2000,
+          "key": "kp0"
+        }
+      ],
+      "keys": {
+        "left": "kp4",
+        "right": "kp6",
+        "up": "kp8",
+        "down": "kp2",
+        "fire": "kp0",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 200
+      },
+      "demo_input": {
+        "hold": [],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 1500,
+        "weave": [
+          "up",
+          "left",
+          "right"
+        ],
+        "weave_ms": 1700,
+        "weave_hold_ms": 200
+      }
+    },
+    {
+      "id": "spaceace",
+      "title": "Space Ace",
+      "engine": "jsdos",
+      "exodos": "Space Ace (1989)",
+      "bundle": "space-ace-1989.jsdos",
+      "catalog": [
+        "play",
+        "demo"
+      ],
+      "verified": "starts a game (Ace running, then game over); timing with tilt not yet tried",
+      "note": "Its 'Press Fire Button to Start' ignores Space, Enter, Ctrl and Alt: the keyboard fire button is numpad 0. The reel skips the press and shows the attract loop instead.",
+      "boot_keys": [
+        {
+          "wait": 4000,
+          "key": "v"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        },
+        {
+          "wait": 7000,
+          "key": "kp0"
+        },
+        {
+          "wait": 2000,
+          "key": "kp0"
+        }
+      ],
+      "demo_keys": [
+        {
+          "wait": 4000,
+          "key": "v"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        }
+      ],
+      "keys": {
+        "left": "kp4",
+        "right": "kp6",
+        "up": "kp8",
+        "down": "kp2",
+        "fire": "kp0",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 200
+      },
+      "demo_input": false
+    },
+    {
+      "id": "spaceace2",
+      "title": "Space Ace II",
+      "engine": "jsdos",
+      "exodos": "Space Ace II - Borf's Revenge (1991)",
+      "bundle": "space-ace-ii-borf-s-revenge-1991.jsdos",
+      "catalog": [
+        "demo"
+      ],
+      "verified": "intro loop plays; the game itself stops at a copy-protection prompt",
+      "note": "Demo reel only: starting a game asks for a protection code from the manual. The intro before that is all cinema.",
+      "boot_keys": [
+        {
+          "wait": 4000,
+          "key": "v"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        }
+      ],
+      "demo_keys": [
+        {
+          "wait": 4000,
+          "key": "v"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        },
+        {
+          "wait": 1000,
+          "key": "n"
+        }
+      ],
+      "keys": {
+        "left": "kp4",
+        "right": "kp6",
+        "up": "kp8",
+        "down": "kp2",
+        "fire": "kp0",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 200
+      },
+      "demo_input": false
+    },
+    {
+      "id": "guyspy",
+      "title": "Guy Spy",
+      "engine": "jsdos",
+      "exodos": "Guy Spy and the Crystals of Armageddon (1992)",
+      "bundle": "guy-spy-and-the-crystals-of-armageddon-1992.jsdos",
+      "catalog": [
+        "demo"
+      ],
+      "verified": "title and credits loop; starting a game not tried yet",
+      "note": "A ReadySoft CD title. Its disc image mounts as D:, which needed the bundler to match the image's file-name case. Answers VGA, no sound, no joystick.",
+      "boot_keys": [
+        {
+          "wait": 11000,
+          "key": "3"
+        },
+        {
+          "wait": 2000,
+          "key": "1"
+        },
+        {
+          "wait": 2000,
+          "key": "n"
+        }
+      ],
+      "keys": {
+        "left": "kp4",
+        "right": "kp6",
+        "up": "kp8",
+        "down": "kp2",
+        "fire": "kp0",
+        "menu": "esc"
+      },
+      "controls": {
+        "deadzone": 200
+      },
+      "demo_input": false
+    },
+    {
+      "id": "maddog",
+      "title": "Mad Dog McCree",
+      "engine": "jsdos",
+      "exodos": "Mad Dog McCree (1993)",
+      "bundle": "mad-dog-mccree-1993.jsdos",
+      "catalog": [
+        "demo"
+      ],
+      "verified": "attract sequence plays: title, saloon, shootout",
+      "note": "Full-motion video western on a CD image. It wants a light gun, so it lives in the demo reel, where its attract sequence runs by itself.",
+      "boot_keys": [
+        {
+          "wait": 3500,
+          "key": "1"
+        }
+      ],
+      "keys": {},
+      "controls": {
+        "deadzone": 200
+      },
+      "demo_input": false
+    },
+    {
+      "id": "braindead13",
+      "title": "Brain Dead 13",
+      "engine": "jsdos",
+      "exodos": "Brain Dead 13 (1995)",
+      "catalog": [
+        "demo"
+      ],
+      "demo_s": 55,
+      "verified": "animated intro plays",
+      "note": "ReadySoft's animated cartoon adventure, 456 MB of CD, run in place from eXoDOS.",
+      "boot_keys": [],
+      "keys": {},
+      "demo_input": false
+    },
+    {
+      "id": "crimepatrol",
+      "title": "Crime Patrol",
+      "engine": "jsdos",
+      "exodos": "Crime Patrol (1994)",
+      "catalog": [
+        "demo"
+      ],
+      "demo_s": 55,
+      "verified": "attract sequence plays",
+      "note": "American Laser Games full-motion video on a CD image, run in place from eXoDOS. It wants a light gun, so it lives in the demo reel, where its attract sequence runs by itself.",
+      "boot_keys": [],
+      "keys": {},
+      "demo_input": false
+    },
+    {
+      "id": "drugwars",
+      "title": "Drug Wars",
+      "engine": "jsdos",
+      "exodos": "Drug Wars (1994)",
+      "catalog": [
+        "demo"
+      ],
+      "demo_s": 55,
+      "verified": "attract sequence plays",
+      "note": "American Laser Games full-motion video on a CD image, run in place from eXoDOS. It wants a light gun, so it lives in the demo reel, where its attract sequence runs by itself.",
+      "boot_keys": [],
+      "keys": {},
+      "demo_input": false
+    },
+    {
+      "id": "maddog2",
+      "title": "Mad Dog II",
+      "engine": "jsdos",
+      "exodos": "Mad Dog II - The Lost Gold (1994)",
+      "catalog": [
+        "demo"
+      ],
+      "demo_s": 55,
+      "verified": "attract sequence plays",
+      "note": "American Laser Games full-motion video on a CD image, run in place from eXoDOS. It wants a light gun, so it lives in the demo reel, where its attract sequence runs by itself.",
+      "boot_keys": [],
+      "keys": {},
+      "demo_input": false
+    },
+    {
+      "id": "johnnyrock",
+      "title": "Who Shot Johnny Rock",
+      "engine": "jsdos",
+      "exodos": "Who Shot Johnny Rock (1994)",
+      "catalog": [
+        "demo"
+      ],
+      "demo_s": 55,
+      "verified": "attract sequence plays",
+      "note": "American Laser Games full-motion video on a CD image, run in place from eXoDOS. It wants a light gun, so it lives in the demo reel, where its attract sequence runs by itself.",
+      "boot_keys": [],
+      "keys": {},
+      "demo_input": false
+    },
+    {
+      "id": "spacepirates",
+      "title": "Space Pirates",
+      "engine": "jsdos",
+      "exodos": "Space Pirates (1994)",
+      "catalog": [
+        "demo"
+      ],
+      "demo_s": 55,
+      "verified": "attract sequence plays",
+      "note": "American Laser Games full-motion video on a CD image, run in place from eXoDOS. It wants a light gun, so it lives in the demo reel, where its attract sequence runs by itself.",
+      "boot_keys": [],
+      "keys": {},
+      "demo_input": false
+    },
+    {
+      "id": "justicieros",
+      "title": "Los Justicieros",
+      "engine": "jsdos",
+      "exodos": "Justicieros, Los (1996)",
+      "catalog": [
+        "demo"
+      ],
+      "demo_s": 55,
+      "verified": "intro and attract scenes play",
+      "note": "Spanish light-gun western in full-motion video, on a CD image run in place.",
+      "boot_keys": [],
+      "keys": {},
+      "demo_input": false
+    },
+    {
+      "id": "rebelassault",
+      "title": "Rebel Assault",
+      "engine": "jsdos",
+      "exodos": "Star Wars - Rebel Assault (1993)",
+      "catalog": [
+        "demo"
+      ],
+      "demo_s": 55,
+      "verified": "intro plays",
+      "note": "LucasArts' CD-ROM showpiece: logo, X-wings, Vader, all from a 295 MB disc image run in place.",
+      "boot_keys": [],
+      "keys": {},
+      "demo_input": false
+    },
+    {
+      "id": "fortboyard",
+      "title": "Fort Boyard",
+      "engine": "jsdos",
+      "exodos": "Fort Boyard - The Challenge (1995)",
+      "catalog": [
+        "demo"
+      ],
+      "demo_s": 30,
+      "verified": "intro plays, then a still menu",
+      "note": "Its intro, then its main menu, which needs a mouse. A short turn in the reel.",
+      "boot_keys": [],
+      "keys": {},
+      "demo_input": false
     },
     {
       "id": "stunts",
@@ -110,6 +675,18 @@
       },
       "controls": {
         "deadzone": 200
+      },
+      "demo_input": {
+        "hold": [
+          "up"
+        ],
+        "tap": [],
+        "weave": [
+          "left",
+          "right"
+        ],
+        "weave_ms": 3000,
+        "weave_hold_ms": 250
       }
     },
     {
@@ -177,6 +754,18 @@
       },
       "controls": {
         "deadzone": 200
+      },
+      "demo_input": {
+        "hold": [
+          "up"
+        ],
+        "tap": [],
+        "weave": [
+          "left",
+          "right"
+        ],
+        "weave_ms": 3000,
+        "weave_hold_ms": 250
       }
     },
     {
@@ -244,6 +833,18 @@
       },
       "controls": {
         "deadzone": 200
+      },
+      "demo_input": {
+        "hold": [
+          "up"
+        ],
+        "tap": [],
+        "weave": [
+          "left",
+          "right"
+        ],
+        "weave_ms": 3000,
+        "weave_hold_ms": 250
       }
     },
     {
@@ -331,6 +932,18 @@
       },
       "controls": {
         "deadzone": 200
+      },
+      "demo_input": {
+        "hold": [
+          "up"
+        ],
+        "tap": [],
+        "weave": [
+          "left",
+          "right"
+        ],
+        "weave_ms": 3000,
+        "weave_hold_ms": 250
       }
     },
     {
@@ -383,6 +996,21 @@
       },
       "controls": {
         "deadzone": 200
+      },
+      "demo_input": {
+        "hold": [
+          "up"
+        ],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 1800,
+        "weave": [
+          "left",
+          "right"
+        ],
+        "weave_ms": 2000,
+        "weave_hold_ms": 200
       }
     },
     {
@@ -451,6 +1079,20 @@
       },
       "controls": {
         "deadzone": 190
+      },
+      "demo_input": {
+        "hold": [],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 900,
+        "weave": [
+          "left",
+          "right",
+          "down"
+        ],
+        "weave_ms": 2000,
+        "weave_hold_ms": 300
       }
     },
     {
@@ -880,6 +1522,19 @@
       },
       "controls": {
         "deadzone": 190
+      },
+      "demo_input": {
+        "hold": [],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 550,
+        "weave": [
+          "up",
+          "down"
+        ],
+        "weave_ms": 1200,
+        "weave_hold_ms": 500
       }
     },
     {
@@ -980,6 +1635,19 @@
       },
       "controls": {
         "deadzone": 190
+      },
+      "demo_input": {
+        "hold": [],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 550,
+        "weave": [
+          "up",
+          "down"
+        ],
+        "weave_ms": 1200,
+        "weave_hold_ms": 500
       }
     },
     {
@@ -1048,6 +1716,16 @@
       },
       "controls": {
         "deadzone": 190
+      },
+      "demo_input": {
+        "hold": [
+          "right"
+        ],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 1400,
+        "weave": []
       }
     },
     {
@@ -1116,6 +1794,16 @@
       },
       "controls": {
         "deadzone": 190
+      },
+      "demo_input": {
+        "hold": [
+          "right"
+        ],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 1400,
+        "weave": []
       }
     },
     {
@@ -1184,6 +1872,16 @@
       },
       "controls": {
         "deadzone": 190
+      },
+      "demo_input": {
+        "hold": [
+          "right"
+        ],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 1400,
+        "weave": []
       }
     },
     {
@@ -1252,6 +1950,16 @@
       },
       "controls": {
         "deadzone": 190
+      },
+      "demo_input": {
+        "hold": [
+          "right"
+        ],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 1400,
+        "weave": []
       }
     },
     {
@@ -1320,6 +2028,16 @@
       },
       "controls": {
         "deadzone": 190
+      },
+      "demo_input": {
+        "hold": [
+          "right"
+        ],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 1400,
+        "weave": []
       }
     },
     {
@@ -1388,6 +2106,16 @@
       },
       "controls": {
         "deadzone": 190
+      },
+      "demo_input": {
+        "hold": [
+          "right"
+        ],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 1400,
+        "weave": []
       }
     },
     {
@@ -1456,6 +2184,16 @@
       },
       "controls": {
         "deadzone": 190
+      },
+      "demo_input": {
+        "hold": [
+          "right"
+        ],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 1400,
+        "weave": []
       }
     },
     {
@@ -1524,6 +2262,16 @@
       },
       "controls": {
         "deadzone": 190
+      },
+      "demo_input": {
+        "hold": [
+          "right"
+        ],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 1400,
+        "weave": []
       }
     },
     {
@@ -1592,6 +2340,16 @@
       },
       "controls": {
         "deadzone": 190
+      },
+      "demo_input": {
+        "hold": [
+          "right"
+        ],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 1400,
+        "weave": []
       }
     },
     {
@@ -1625,6 +2383,16 @@
       },
       "controls": {
         "deadzone": 200
+      },
+      "demo_input": {
+        "hold": [
+          "right"
+        ],
+        "tap": [
+          "fire"
+        ],
+        "tap_ms": 1400,
+        "weave": []
       }
     }
   ]

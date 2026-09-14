@@ -28,6 +28,22 @@ if (cdIndex > 0 && process.argv[cdIndex + 1]) {
   if (startCmd === "--cd") startCmd = process.argv[cdIndex + 2] || null;
 }
 
+// Mounts besides C: that the game expects -- a CD image, a floppy -- and the
+// drive to start from when that is not C:. Both come from eXoDOS's own
+// dosbox.conf via from-exodos.py:
+//   --pre "imgmount d cd/game.cue -t cdrom"   (repeatable)
+//   --drive d:
+const preLines = [];
+let startDrive = "c:";
+for (let i = 4; i < process.argv.length; i++) {
+  if (process.argv[i] === "--pre" && process.argv[i + 1] !== undefined) {
+    preLines.push(process.argv[++i]);
+  } else if (process.argv[i] === "--drive" && process.argv[i + 1]) {
+    startDrive = process.argv[++i];
+  }
+}
+if (startCmd && startCmd.startsWith("--")) startCmd = null;
+
 if (!folder || !outPath) {
   console.error("usage: make-bundle.js <game-folder> <output.jsdos> [START.EXE]");
   process.exit(2);
@@ -87,7 +103,8 @@ const conf = [
   "",
   "[autoexec]",
   "mount c .",
-  "c:",
+  ...preLines,
+  startDrive,
   ...(startDir ? ["cd " + startDir] : []),
   startCmd,
   "",

@@ -142,6 +142,11 @@ def main():
                       help="let DOSBox print its console to stderr")
     game.add_argument("--video", default=env("VIDEO", ""),
                       help="video file for --source video (needs OpenCV)")
+    game.add_argument("--exodos-root", default=os.environ.get("EXODOS_ROOT", ""),
+                      help="eXoDOS collection to run DOS titles from in place when "
+                           "they have no bundle (also the library's exodos.root)")
+    game.add_argument("--reel", action="store_true", default=env_flag("REEL"),
+                      help="start the kiosk in its demo reel instead of the menu")
     game.add_argument("--library", default=env("LIBRARY", ""),
                       help="games.json for --source kiosk (defaults to "
                            "kiosk/games.json, then kiosk/games.example.json)")
@@ -239,6 +244,18 @@ def main():
         # entries whose bundle is not actually here: a menu full of titles
         # that fail on selection is worse than a short menu.
         base = os.path.dirname(os.path.abspath(path))
+
+        # Titles with no bundle of their own can run in place, straight from
+        # an eXoDOS collection. "prefer": "in_place" does that even when a
+        # bundle exists. Loading a zip costs roughly five times its size in
+        # memory while it runs, hence the cap.
+        from microstream.exodos import Collection
+        exo_cfg = library.get("exodos") or {}
+        exodos = Collection(args.exodos_root or exo_cfg.get("root") or "")
+        prefer_in_place = exo_cfg.get("prefer") == "in_place"
+        max_mb = int(exo_cfg.get("max_mb", 700))
+        in_place = 0
+
         playable = []
         for game in games:
             if game.get("engine") == "jsdos":
@@ -260,8 +277,20 @@ def main():
                         local = os.path.join(base, bundle)
                         if not os.path.exists(local):
                             local = os.path.join(ROOT, "server", "jsdos", bundle)
-                if not local or not os.path.exists(local):
-                    print("library: skipping %s (no bundle yet)" % game.get("id"))
+                have_bundle = bool(local) and os.path.exists(local)
+                if game.get("exodos") and exodos.has(game["exodos"]) and (
+                        prefer_in_place or not have_bundle):
+                    mb = os.path.getsize(exodos.zip_path(game["exodos"])) / 1e6
+                    if mb > max_mb:
+                        print("library: skipping %s (%.0f MB, over the %d MB limit "
+                              "for running in place)" % (game.get("id"), mb, max_mb))
+                        continue
+                    playable.append(dict(game, exodos_root=exodos.root))
+                    in_place += 1
+                    continue
+                if not have_bundle:
+                    print("library: skipping %s (no bundle, and no eXoDOS collection "
+                          "that has it)" % game.get("id"))
                     continue
                 game = dict(game, bundle_path=local)
             elif game.get("engine") == "video":
@@ -283,9 +312,16 @@ def main():
 
         print("library: %s (%d of %d playable)"
               % (os.path.basename(path), len(playable), len(games)))
+        if in_place:
+            print("library: %d DOS titles run in place from %s" % (in_place, exodos.root))
         source = KioskSource(playable, width=width, height=height,
                              tilt_kw=tilt_kw,
-                             title=library.get("title", "MICRO ARCADE"))
+                             title=library.get("title", "MICRO ARCADE"),
+                             settings={k: library[k] for k in ("kiosk", "reel")
+                                       if k in library},
+                             reel=args.reel)
+        print("library: %d in the menu, %d in the demo reel"
+              % (len(source.games), len(source.reel_games)))
         profile = DoomProfile(auto_use=args.auto_use, **tilt_kw)
     elif args.source == "jsdos":
         # A DOS game is described by data, so its controls are too.

@@ -266,8 +266,13 @@ class Encoder:
         # server paces the fragments), but not needing it is far better, and
         # DOOM at a slightly lower JPEG quality beats DOOM that never repaints.
         if max_bytes and (self.caps & P.CAP_JPEG) and payload_size(out) > max_bytes:
+            # Full-motion photographic content needs to go much lower than a
+            # game does: measured on a Skyrim recording, 15% of frames fit one
+            # datagram at q19 and 97% at q10. A softer picture that arrives
+            # beats a sharper one that stalls waiting for its second half.
             for q in (int(self.quality * 0.7), int(self.quality * 0.5),
-                      int(self.quality * 0.35)):
+                      int(self.quality * 0.35), int(self.quality * 0.25),
+                      int(self.quality * 0.18)):
                 candidate = encode_all(max(10, q))
                 if payload_size(candidate) <= max_bytes:
                     out = candidate
