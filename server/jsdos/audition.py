@@ -38,6 +38,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
@@ -110,12 +111,25 @@ def load_frame(path):
     return np.asarray(Image.frombytes("RGB", wh, data[:wh[0] * wh[1] * 3]))
 
 
-def audition(title, root, keys, run_for, probe=None):
-    path, err = ensure_bundle(title, root)
-    if not path:
-        return dict(title=title, verdict="DEAD", detail="bundle: %s" % err)
+def audition(title, root, keys, run_for, probe=None, direct=False):
+    stem = stem_of(title)
+    before = []
+    if direct:
+        # In place from the collection, exactly as the kiosk runs it.
+        from microstream.exodos import Collection
+        try:
+            game = Collection(root).title(title)
+        except RuntimeError as exc:
+            return dict(title=title, verdict="DEAD", detail=str(exc))
+        skeleton = os.path.join(tempfile.gettempdir(), "audition-%s.zip" % stem)
+        with open(skeleton, "wb") as fh:
+            fh.write(game.skeleton())
+        path, before = game.zip_path, [skeleton]
+    else:
+        path, err = ensure_bundle(title, root)
+        if not path:
+            return dict(title=title, verdict="DEAD", detail="bundle: %s" % err)
 
-    stem = os.path.splitext(os.path.basename(path))[0]
     raw = os.path.join(HERE, stem + ".rgb")
 
     # The boot sequence, then one long hold of a movement key.
@@ -133,8 +147,9 @@ def audition(title, root, keys, run_for, probe=None):
 
     try:
         subprocess.run(
-            ["node", os.path.join(HERE, "probe.js"), path, raw,
-             "--keys", spec, "--until", str(run_for),
+            ["node", os.path.join(HERE, "probe.js"), path, raw] +
+            sum((["--before", b] for b in before), []) +
+            ["--keys", spec, "--until", str(run_for),
              "--shots", ",".join(str(s) for s in shots)],
             cwd=HERE, capture_output=True, text=True,
             timeout=run_for / 1000.0 + 60)
@@ -212,6 +227,9 @@ def main():
     ap.add_argument("--jobs", type=int, default=3)
     ap.add_argument("--run-for", type=int, default=RUN_FOR_MS)
     ap.add_argument("--out", default="", help="write the verdicts as JSON")
+    ap.add_argument("--direct", action="store_true",
+                    help="run each title in place from the eXoDOS collection "
+                         "instead of from a bundle")
     args = ap.parse_args()
 
     plan = {}
@@ -234,7 +252,8 @@ def main():
             keys = [tuple(k[:2]) for k in entry.get("keys", GENERIC)]
             run_for = entry.get("run_for", args.run_for)
             probe = entry.get("probe", DEFAULT_PROBE)
-            futures[pool.submit(audition, t, args.root, keys, run_for, probe)] = t
+            futures[pool.submit(audition, t, args.root, keys, run_for, probe,
+                                args.direct)] = t
         for fut in concurrent.futures.as_completed(futures):
             r = fut.result()
             results.append(r)

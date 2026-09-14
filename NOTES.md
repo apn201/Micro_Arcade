@@ -94,6 +94,51 @@ The kiosk has one title that is not emulated at all. `engine: video` plays a rec
 
 It is there because the device can't tell a recording from a game, which was the whole premise. The file lives in `kiosk/media/` and is gitignored; the library entry only points at it.
 
+## Why Skyrim stopped every now and then
+
+Two separate things, found by measuring on loopback rather than guessing.
+
+The decoder. OpenCV decodes a frame of the clip in 0.3 ms, but about once every 40 seconds one read took 182 ms. Done inline, that froze the whole service loop and the picture stopped. The video source now decodes in its own thread, half a second ahead of the clock, and hands the service whichever frame is due.
+
+The datagram budget. The encoder squeezes JPEG quality to keep an update inside one UDP datagram, because the device's socket holds one datagram and a second fragment is a coin toss. The squeeze stopped at quality 19. That's plenty for DOOM, whose updates are small dirty rectangles, but Skyrim changes every pixel of every frame, snow and trees, and at q19 only 15% of frames fit. Every other update went out in two fragments, and a lost half means no ack, an ack timeout and a stall. The ladder now goes down to q10, where 97% of frames fit. On loopback, 100% of updates became single datagrams and the longest freeze on a clean link dropped from 198 ms to 141 ms. With 3% packet loss there is still one stall of about a quarter second every twelve seconds or so, which is the ack timeout doing its job.
+
+## Demo reel and browsing
+
+The menu shows the "play" catalogue. The demo reel runs the "demo" catalogue, which by default is everything, plus titles that are only worth watching. It boots real games live, loading screens included, with their controls working, so someone can pick the cabinet up mid-reel and play. It moves on after `advance_s`, or a title's own `demo_s`, or on double click. `advance_s: 0` waits for the double click only. A title can boot differently in the reel with `demo_keys`: Dragon's Lair skips the start press so its own attract demo plays.
+
+Double click can be claimed by the kiosk in either mode (`"double_click": "next"`). The game then never sees it, same rule as long press. The first click of the pair still reaches the game; delaying every click to wait for a possible second one would cost more than it saves.
+
+Nobody is holding the cabinet in attract mode, so the reel also plays. An autopilot wraps the title's own profile and, once the boot keys have had time to get into the game, holds and taps the same joystick bits a GPIO joystick would set: forward and fire for the shooters, throttle and a little steering for racing, run right and jump for platformers. Going through the profile means every game's own key mapping still applies. The turns are lopsided, two lefts to every right: with symmetric ones DOOM spent half a minute firing at the first wall it walked into. Any press, or a tilt past the deadzone, hands control to whoever picked the cabinet up; six idle seconds and the autopilot is back. The laserdisc and full-motion video titles have it switched off, because input only interrupts their attract sequences. The first real-server run crashed the moment Wolfenstein started: boot-key waits add up as floats, and a float can't index the list of turns. The test now drives a reel title through its turns instead of only checking it was wrapped.
+
+Long press now also resets the tilt. Holding the device still with a finger on the screen for most of a second is the best calibration sample the cabinet ever gets, so the kiosk averages the accelerometer over the press and uses it as level for the menu and the next game. The server resets a profile whenever it swaps one in, so the preset has to survive `reset()`.
+
+## Laserdisc games
+
+Dragon's Lair and Space Ace are quick-time events all the way through: a direction or the sword, at the right moment. That is exactly tilt plus a tap, which is why they are worth the trouble.
+
+- ReadySoft's PC versions open on a text setup screen that wants letters, not numbers: V for VGA, N for no sound, N for no joystick, N for no install. The "1" the rest of the library sends for the eXoDOS launcher landed in the graphics field and sat there forever.
+- Space Ace's "Press Fire Button to Start" ignores Space, Enter, Ctrl, Alt and numpad 5. Fire is numpad 0, or Insert. Dragon's Lair (1989) takes Space. Dragon's Lair II reads the whole numpad.
+- Dragon's Lair III and Space Ace II ask for a code from the manual once a game starts, so they are out of the play catalogue. Space Ace II's intro still runs in the reel.
+- CD titles needed the bundler to carry `imgmount` lines over from eXoDOS's config. Guy Spy then still failed with "The image must be on a host or local drive": eXoDOS writes `cd\GuySpy.cue`, the archive has `CD/`, and js-dos's file system is case-sensitive. Mount paths are now matched against the real file names.
+- Dragon's Lair II's launch script shows a hint and then runs `pause` before the game, and the bundler took `pause` for the game.
+- Mad Dog McCree's full-motion video runs fine from its ISO. It wants a light gun, so it is in the reel only.
+
+## Running eXoDOS in place
+
+The first version copied every game out of eXoDOS into a `.jsdos` bundle next to the code. Fine for a 1 MB shareware title, silly for a 500 MB CD game that is already sitting on the disk.
+
+js-dos turned out to accept a list of zips and load them into one file system, in order. So a title now boots from two: a few hundred bytes generated on the spot, then the eXoDOS zip itself, untouched, from wherever the collection lives. The generated one holds the `dosbox.conf` and one entry for every folder of the game. The folders are the catch: eXoDOS zips have no folder entries, and js-dos creates a file's parent folder but not its grandparent, so without them Wolfenstein 3D never started at all.
+
+Everything the config needs comes from the zip's file list and eXoDOS's own launch script, never from extracting anything: which CD or floppy images to mount (with the file names' real case, and quotes where the path has spaces), which drive and folder to start from, and whether `call run` means `RUN.BAT` or `RUN.EXE`. `from-exodos.py` builds its bundles from the same code, so there is one copy of those rules.
+
+Memory is the limit. A running title takes roughly five times its zip size: The Last Bounty Hunter's 194 MB was 1.1 GB, Brain Dead 13's 456 MB was 2.5 GB, Space Ace CD's 541 MB was 3.0 GB. js-dos runs DOSBox as 32-bit WebAssembly, which stops at 4 GB, so the kiosk skips zips over 700 MB and the 1 GB discs stay out.
+
+Bundles that already exist are still used first, because every title in the play catalogue was auditioned from one. Setting `"prefer": "in_place"` ignores them.
+
+Auditioned in place, 20 of the 26 playable eXoDOS titles scored PLAY without a bundle anywhere. Singe's Castle, Dragon's Lair II and Space Ace score DEMO either way, because their scenes move whether you press anything or not. Cosmo and Crystal Caves score STATIC either way and were checked by eye. Tyrian is the one real difference: in place it stops on its Players menu, because its scripted Downs and Enters land at different moments when the zip loads differently. It keeps its bundle until the sequence is retimed.
+
+The same way, straight from the collection, fourteen of fifteen full-motion video discs from 196 to 541 MB booted: nine of them run attract sequences good enough for the reel. Man Enough (661 MB, two CD images and a floppy) hung. Dragon's Lair CD, Space Ace CD and Kingdom stop on setup screens that still need keys. Dracula Unleashed and The Lawnmower Man open with a minute of text on black, which reads as nothing at 128x128.
+
 ## The case
 
 Retromaker's arcade cabinet from Printables, modified to fit. Printed on a Prusa M4S, sides in wood-toned PLA, the rest black. Small enough to hold between two fingers.

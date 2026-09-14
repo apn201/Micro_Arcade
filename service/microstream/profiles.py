@@ -54,6 +54,9 @@ class TiltProfile(Profile):
 
     #: Two presses inside this window mean "the other action".
     DOUBLE_CLICK_MS = 400
+    #: The kiosk can claim double click for itself (skip to the next title);
+    #: a game then must not also act on it.
+    double_click_enabled = True
     #: How long that action is then held. A game samples input once per frame,
     #: so this has to span several of them to be seen at all.
     CLICK_HOLD_MS = 300
@@ -85,8 +88,9 @@ class TiltProfile(Profile):
         self.reset()
 
     def reset(self):
-        self.neutral = [0, 0, 0]
-        self.calibrated = not self.calibrate
+        preset = getattr(self, "_preset", None)
+        self.neutral = list(preset) if preset is not None else [0, 0, 0]
+        self.calibrated = preset is not None or not self.calibrate
         self._cal_n = 0
         self._cal_sum = [0, 0, 0]
         self._turn_dir = 0
@@ -98,6 +102,13 @@ class TiltProfile(Profile):
         # Last values that fed the decision, for --debug-keys.
         self.last_turn = 0
         self.last_move = 0
+
+    def preset_neutral(self, neutral):
+        """Use a pose measured elsewhere as level -- the kiosk's long press --
+        instead of sampling the first half-second of play. Survives reset(),
+        because the server resets a profile whenever it swaps one in."""
+        self._preset = list(neutral)
+        self.reset()
 
     def describe(self):
         """One line for the startup log. On a deployed box this is the only
@@ -195,6 +206,9 @@ class TiltProfile(Profile):
         every shot, which is a much worse trade than one wasted bullet.
         """
         fire = bool(buttons & P.BTN_FIRE)
+        if not self.double_click_enabled:
+            self._prev_fire = fire
+            return False
         if fire and not self._prev_fire:
             if self._last_click and now_ms - self._last_click <= self.DOUBLE_CLICK_MS:
                 self._click_until = now_ms + self.CLICK_HOLD_MS
@@ -373,6 +387,86 @@ class KeymapProfile(TiltProfile):
             add("double")
 
         return keys
+
+
+class AutopilotProfile:
+    """Plays a title for nobody: the demo reel's attract-mode input.
+
+    Wraps the title's real profile. Until someone touches the cabinet, it holds
+    and taps the joystick bits every profile already honours -- forward and
+    fire by default, so a corridor shooter charges in guns blazing -- which
+    means each game's own key mapping still applies. The moment the button is
+    pressed or the device is tilted past the deadzone, the real input takes
+    over, and the autopilot waits until the cabinet has been left alone again.
+    """
+
+    #: Two lefts to every right: symmetric turns cancel out, and a shooter
+    #: that walks into a wall would stay facing it for the whole turn.
+    DEFAULT = {"hold": ["up"], "tap": ["fire"], "tap_ms": 600, "tap_hold_ms": 150,
+               "weave": ["left", "left", "right"], "weave_ms": 2000, "weave_hold_ms": 500}
+    BITS = {"up": P.BTN_UP, "down": P.BTN_DOWN, "left": P.BTN_LEFT,
+            "right": P.BTN_RIGHT, "fire": P.BTN_FIRE}
+
+    #: How long nobody has to touch the cabinet before the autopilot resumes.
+    IDLE_MS = 6000
+
+    def __init__(self, inner, pattern=None, start_after_ms=0):
+        pat = dict(self.DEFAULT)
+        pat.update(pattern or {})
+        self.__dict__.update(inner=inner, pattern=pat, start_after_ms=start_after_ms,
+                             _t0=None, _last_user=-10 ** 9)
+
+    # Everything else -- neutral, double_click_enabled, last_turn -- is the
+    # wrapped profile's, read and written straight through.
+    def __getattr__(self, name):
+        return getattr(self.__dict__["inner"], name)
+
+    def __setattr__(self, name, value):
+        if name in self.__dict__:
+            self.__dict__[name] = value
+        else:
+            setattr(self.inner, name, value)
+
+    def reset(self):
+        self.inner.reset()
+        self._t0 = None
+
+    def describe(self):
+        return "%s\nautopilot: %s" % (self.inner.describe(), self.pattern)
+
+    def _someone_playing(self, buttons, accel, now):
+        inner = self.inner
+        touched = bool(buttons)
+        if not touched and getattr(inner, "tilt", False) and getattr(inner, "calibrated", False):
+            for axis in (inner.turn_axis, inner.move_axis):
+                if abs(accel[axis] - inner.neutral[axis]) > inner.deadzone:
+                    touched = True
+        if touched:
+            self._last_user = now
+        return now - self._last_user < self.IDLE_MS
+
+    def synthetic_buttons(self, now):
+        pat = self.pattern
+        t = int(now - self._t0 - self.start_after_ms)   # boot-key waits add up as floats
+        if t < 0:
+            return 0                  # the boot keys are still getting into the game
+        bits = 0
+        for role in pat.get("hold") or []:
+            bits |= self.BITS.get(role, 0)
+        if pat.get("tap") and t % pat["tap_ms"] < pat["tap_hold_ms"]:
+            for role in pat["tap"]:
+                bits |= self.BITS.get(role, 0)
+        weave = pat.get("weave") or []
+        if weave and pat.get("weave_ms") and t % pat["weave_ms"] < pat["weave_hold_ms"]:
+            bits |= self.BITS.get(weave[(t // pat["weave_ms"]) % len(weave)], 0)
+        return bits
+
+    def held_keys(self, buttons, accel, state, now_ms):
+        if self._t0 is None:
+            self._t0 = now_ms
+        if self._someone_playing(buttons, accel, now_ms):
+            return self.inner.held_keys(buttons, accel, state, now_ms)
+        return self.inner.held_keys(self.synthetic_buttons(now_ms), accel, state, now_ms)
 
 
 PROFILES = {"doom": DoomProfile, "keymap": KeymapProfile}

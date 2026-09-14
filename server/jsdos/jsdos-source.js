@@ -21,7 +21,7 @@ const emulators = global.emulators;
 const args = process.argv.slice(2);
 let host = "127.0.0.1";
 let port = 0;
-let bundlePath = null;
+const bundlePaths = [];
 let backend = "dosboxNode";     // dosboxXNode also exists (DOSBox-X)
 
 for (let i = 0; i < args.length; i++) {
@@ -31,7 +31,7 @@ for (let i = 0; i < args.length; i++) {
     host = h;
     port = parseInt(p, 10);
   } else if (a === "--bundle") {
-    bundlePath = args[++i];
+    bundlePaths.push(args[++i]);        // repeatable: loaded in order
   } else if (a === "--backend") {
     backend = args[++i];
   } else if (a === "--help") {
@@ -40,7 +40,7 @@ for (let i = 0; i < args.length; i++) {
   }
 }
 
-if (!port || !bundlePath) {
+if (!port || !bundlePaths.length) {
   console.error("jsdos: --connect HOST:PORT and --bundle FILE are required");
   process.exit(2);
 }
@@ -144,8 +144,12 @@ function sendFrame(buf, width, height, channels) {
 }
 
 function start() {
-  const bundle = new Uint8Array(fs.readFileSync(bundlePath));
-  console.error("jsdos: bundle " + path.basename(bundlePath) + " (" + bundle.length + " bytes), backend " + backend);
+  // Several bundles load in order into one file system. A title running in
+  // place from eXoDOS is a generated zip (folders and dosbox.conf) followed by
+  // the collection's own zip, untouched.
+  const init = bundlePaths.map((p) => new Uint8Array(fs.readFileSync(p)));
+  console.error("jsdos: " + bundlePaths.map((p, i) => path.basename(p) + " (" +
+                init[i].length + " bytes)").join(" + ") + ", backend " + backend);
 
   if (typeof emulators[backend] !== "function") {
     console.error("jsdos: no such backend: " + backend);
@@ -153,7 +157,7 @@ function start() {
     return;
   }
 
-  emulators[backend](bundle).then((instance) => {
+  emulators[backend](init.length === 1 ? init[0] : init).then((instance) => {
     ci = instance;
 
     // onFrameSize does not fire on this backend, so take the dimensions from

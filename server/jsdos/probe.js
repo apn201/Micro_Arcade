@@ -33,8 +33,16 @@ const scripted = (argOf("--keys") || "").split(",").filter(Boolean).map((s) => {
 const runFor = parseInt(argOf("--until") || "6000", 10);
 const shots = (argOf("--shots") || "").split(",").filter(Boolean).map(Number);
 
-const bundle = new Uint8Array(fs.readFileSync(bundlePath));
-console.log("bundle:", bundlePath, bundle.length, "bytes");
+// --before FILE loads a zip ahead of the bundle (repeatable). That is how a
+// title runs in place from eXoDOS: a generated zip of folders and dosbox.conf,
+// then the collection's own zip.
+const before = [];
+for (let i = 2; i < process.argv.length; i++) {
+  if (process.argv[i] === "--before" && process.argv[i + 1]) before.push(process.argv[++i]);
+}
+const init = before.concat([bundlePath]).map((f) => new Uint8Array(fs.readFileSync(f)));
+console.log("bundle:", bundlePath, init[init.length - 1].length, "bytes",
+            before.length ? "(after " + before.length + " more)" : "");
 console.log("pathPrefix:", emulators.pathPrefix);
 console.log("backends:", Object.keys(emulators).filter((k) => typeof emulators[k] === "function").join(", "));
 
@@ -44,7 +52,7 @@ let w = 0;
 let h = 0;
 let channels = 0;
 
-emulators.dosboxNode(bundle).then(async (ci) => {
+emulators.dosboxNode(init.length === 1 ? init[0] : init).then(async (ci) => {
   console.log("command interface up");
 
   ci.events().onFrameSize((fw, fh) => {
