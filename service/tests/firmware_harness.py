@@ -167,7 +167,7 @@ class RestrictedSocket:
 _socket.socket = RestrictedSocket
 
 cfg = types.ModuleType("config")
-cfg.WIFI_SSID = "lammas"
+cfg.WIFI_SSID = "test-ssid"
 cfg.WIFI_PASS = ""
 cfg.SERVER_HOST = "127.0.0.1"
 cfg.SERVER_PORT = PORT

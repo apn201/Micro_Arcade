@@ -1,10 +1,10 @@
 # Micro Arcade
 
-An arcade cabinet built around an M5Stack AtomS3R that plays 27 DOS games and DOOM, and runs a demo reel of 41 titles, none of which run on the AtomS3R. The screen is a terminal. The games run somewhere else.
+An arcade cabinet 1 inch wide, running dozens of DOS games. Actually it is an M5Stack AtomS3R running as a terminal: the games run on a PC and only the screen and the input are transferred. Like VNC or TeamViewer, except the thing on the receiving end costs 15 dollars.
 
-The device has a 128x128 screen, a motion sensor, WiFi, and one button. That is enough to be a terminal and nothing more. It draws whatever the server sends and reports back a tilt and a button. It does not know what DOOM is, what a deadzone is, or which game is running. All of that lives on the server, so the same firmware drives every game, and swapping a game is a server-side change the device never notices.
+The board has a 128x128 screen, a motion sensor, WiFi and one button, and the button is the screen itself. Input, output and a network, so it fulfills the requirements of a terminal. It draws whatever the server sends and reports back a tilt and a button press. It does not know what DOOM is, what a deadzone is, or which game is running, so the same firmware drives every game and swapping one is a server side change the device never notices.
 
-The arcade cabinet is the demo. The point is the pipe: once the device is a draw-only terminal that renders rectangles from a server, the device stops mattering and the server can drive anything.
+I needed a story to demonstrate the terminal, so it became an arcade cabinet running old DOS games. Could have been anything, but this felt like a cool idea, and it can go in a dollhouse after. 28 titles in the menu, 41 in the demo reel, and the eXoDOS collection on the disk behind it has over 7,000 more.
 
 ## How it works
 
@@ -60,7 +60,7 @@ Key design choices, and the bugs that forced them, are written up in full in [NO
 
 ## Games
 
-Each game gets a scripted boot sequence that walks it all the way into gameplay - past the sound-card prompt, the title screens, the pilot-name entry - because the cabinet has no keyboard and the menu text is unreadable at 128x128. Boot sequences are data in the library file. A helper tool, `audition.py`, drives the keys and screenshots the result, scoring each game PLAY / DEMO / STATIC / TEXT by whether the picture answered the controls, not just whether it moved.
+Each game gets a scripted boot sequence that walks it all the way into gameplay - past the sound-card prompt, the title screens, the pilot-name entry - because the cabinet has no keyboard and the menu text is unreadable at 128x128. Boot sequences are data in the library file. A helper tool, `audition.py`, drives the keys and screenshots the result, scoring each game PLAY / DEMO / STATIC / TEXT by whether the picture answered the controls (just checking whether it moved does not work: a car on the start line does not move, and an attract demo moves nicely on its own).
 
 Current library: driving (Stunts, Test Drive III, Stunt Driver, Indianapolis 500, SkyRoads), flight (F-15 Strike Eagle II), shooters (Wolfenstein 3D, Blake Stone, Catacomb 3-D, Heretic, Rise of the Triad, Major Stryker, Tyrian), platformers (Duke Nukem, Commander Keen 4, Cosmo's Cosmic Adventure, Jill of the Jungle, Crystal Caves, Bio Menace, Hocus Pocus, Prehistorik 2, Prince of Persia), laserdisc games (Dragon's Lair, Dragon's Lair: Singe's Castle, Dragon's Lair II, Space Ace), plus DOOM (native binary) and Digger. That's 28 titles in the menu: 27 DOS games and DOOM.
 
@@ -180,14 +180,15 @@ The whole pipeline on loopback, including recovery from 25% packet loss. Also `t
 
 ## What this is actually for
 
-The arcade cabinet is a technical demo, and none of this is a new or complicated idea: remote screens are as old as VNC, and thin clients are a whole industry. What it shows is how little the receiving end needs to be. A board that costs about 15 dollars, with a screen, WiFi and no operating system, gets as much memory and compute as the server behind it has, which is as much as you want. This started as a retrocomputing entry and became an arcade cabinet, but the pipe goes well beyond games:
+None of this is new. VNC has done remote screens since the nineties and thin clients are a whole industry. What is different now is the price of the receiving end: about 15 dollars for a board with a screen, WiFi and no operating system, which gets as much memory and compute as the machine on the other end has.
 
-- **Places where a device gets broken or stolen.** Art galleries, museums, shop windows, info points. If it breaks, it's a 15 dollar part. If it walks off, nothing on it was worth taking: the content and the logic stay on the server.
-- **Instead of a PC or a tablet.** Anything that mostly shows something and takes a tap back can run on the server, and the thing on the wall can be the cheapest board that draws.
-- **Any screen.** 128x128 is this board's panel, not the protocol's. The server sends rectangles at whatever size the client asks for, so a bigger panel works the same way, and an e-ink display would suit something that changes once a minute.
-- **Legacy HMI glances.** Old control PCs get virtualized and contained because a Win95 box does not belong on a plant floor. But an operator sometimes needs to *see* a corner of that screen at a panel. A full thin client is cost and overkill for a glance at a readout. A cheap board that draws one rectangle of a virtualized machine's framebuffer is a reasonable answer for the non-critical, non-Ex, "I just need to see this one gauge over there" case. Not the primary HMI, not safety-critical, not hazardous areas - but there is a real, cost-sensitive middle ground where this fits.
-- **Many screens as one surface.** The server already slices a frame into rectangles for a client that draws whatever arrives. That client can be one screen or fifty. Fifty of these tiles arranged as a single surface - flat, or wrapped over a sphere - is the same protocol pointed at many draw-only terminals at once. No use case required. It would look sick.
-- **Not** a keyboard. The loose keys and the GPIO pins are right there, and adding them would make the thing work better and mean less. The premise is native peripherals only. A keyboard would make it a small computer with buttons instead of a terminal made from a board that was never meant to be one.
+So a screen that owns nothing fits where a PC or a tablet is too much, or where it gets broken or walks off. Galleries, museums, shop windows, an info point nobody is watching. If it breaks it is a 15 dollar part, and if someone takes it they got 15 dollars and no data, because the content and the logic stay on the server. 128x128 is this board's panel and not the protocol's, so a bigger screen works the same way, and for something that changes once a minute e-ink would do.
+
+The one I actually care about is industrial, and that is my day job leaking into a toy. Old control PCs get virtualized and contained, because you cannot have a Win95 box running on a plant floor. The operator still sometimes needs to see a corner of that screen at a panel somewhere, and a real thin client is cost and overkill for a glance at one readout. A cheap board that draws one rectangle of that virtualized machine's framebuffer over UDP, with no OS, no moving parts and almost no attack surface, is a reasonable answer for the non-critical, non-Ex, "I just need to see that gauge over there" case. Not as the primary HMI, not for anything safety critical, and not in hazardous areas. But there is a cost sensitive middle ground in between and this is roughly the shape of it.
+
+Nothing says the client is one screen either. The server already cuts a frame into rectangles for a client that draws whatever arrives, so fifty of them as a single surface, flat or glued on a sphere, is the same protocol pointed at fifty terminals at once. I have no use case for it, it would just look cool.
+
+A keyboard I am not doing, even though the loose keys are in a drawer and the GPIO pins are right there. It would make the thing work better and mean less, since the point was to use only what the board already has.
 
 ## Credits
 
